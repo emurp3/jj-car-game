@@ -561,7 +561,7 @@ const WHEELS = {
 
 
 // per-vehicle customization state
-function freshCar(v){ return {color:v.color, pattern:'none', stickers:[], tire:'t_knobby', addons:[], washed:0}; }
+function freshCar(v){ return {color:v.color, pattern:'none', stickers:[], tire:'t_knobby', addons:[], washed:0, stickerPos:{}, addonPos:{}}; }
 const state = {
   screen:'select', vi:0, stickerTab:0, addonPage:0, addonCat:'all',
   cars: VEHICLES.map(freshCar),
@@ -886,24 +886,55 @@ const SEATS = [
   [0.27,0.26],[0.74,0.40],[0.82,0.36],[0.60,0.34],[0.55,0.32],[0.66,0.34]
 ];
 function drawKidDriver(c,x,y,s,t){
+  // v6: proper chibi kid driver — big round head, warm brown skin, black curly
+  // puffs, backwards blue cap, red racing jacket with white stripes, both
+  // hands on the steering wheel. Bold simple shapes that read at small size.
   const bobY=Math.sin((t||0)*2.3)*1.6*s;
   c.save(); c.translate(x,y+bobY); c.scale(s,s);
-  c.lineWidth=4; c.strokeStyle=OUTLINE; c.lineCap='round';
-  // shirt/body
-  c.fillStyle='#ff8c42'; rr(c,-17,6,34,26,10); c.fill(); c.stroke();
-  // little arm reaching to a steering wheel
-  c.strokeStyle=OUTLINE; c.lineWidth=6;
-  c.beginPath(); c.moveTo(10,14); c.lineTo(19,19); c.stroke();
-  c.strokeStyle='#2b2b33'; c.lineWidth=5; circle(c,23,21,10); c.stroke();
-  // head
-  circle(c,0,-13,17); c.fillStyle='#f2b880'; c.fill(); c.lineWidth=4; c.strokeStyle=OUTLINE; c.stroke();
-  // blue cap, brim toward travel direction (right)
-  c.fillStyle='#2b5bd7'; c.beginPath(); c.arc(0,-15,17,Math.PI*1.03,Math.PI*1.97); c.closePath(); c.fill(); c.stroke();
-  c.fillStyle='#2b5bd7'; rr(c,5,-21,20,7,3); c.fill(); c.stroke();
-  // happy face
-  c.fillStyle=OUTLINE; circle(c,-6,-12,2.4); c.fill(); circle(c,7,-12,2.4); c.fill();
-  c.strokeStyle=OUTLINE; c.lineWidth=2.6; c.beginPath(); c.arc(1,-7,7,0.25,Math.PI-0.25); c.stroke();
-  c.fillStyle='rgba(255,120,120,0.55)'; circle(c,-11,-5,3.6); c.fill(); circle(c,13,-5,3.6); c.fill();
+  c.lineWidth=4.5; c.strokeStyle=OUTLINE; c.lineCap='round'; c.lineJoin='round';
+  const SKIN='#9c6642', HAIR='#20202a';
+  // red racing jacket (torso) with white stripes
+  c.fillStyle='#e63b3b'; rr(c,-18,2,36,30,11); c.fill(); c.stroke();
+  c.fillStyle='#ffffff'; c.fillRect(-11,5,5,25); c.fillRect(6,5,5,25);
+  c.fillStyle='#b3232a'; rr(c,-9,0,18,8,4); c.fill(); c.stroke();
+  // steering wheel: dark ring, spokes, gold hub
+  circle(c,25,20,11.5); c.strokeStyle=OUTLINE; c.lineWidth=5.5; c.stroke();
+  c.lineWidth=3; c.beginPath(); c.moveTo(25,9.5); c.lineTo(25,30.5); c.moveTo(14.5,17); c.lineTo(35.5,17); c.stroke();
+  circle(c,25,20,3.4); c.fillStyle='#ffcf3f'; c.fill(); c.lineWidth=2.5; c.stroke();
+  // jacket-sleeve arms reaching to the wheel
+  c.strokeStyle='#e63b3b'; c.lineWidth=8;
+  c.beginPath(); c.moveTo(-9,12); c.quadraticCurveTo(4,8,17,13.5); c.stroke();
+  c.beginPath(); c.moveTo(11,14); c.quadraticCurveTo(22,22,30.5,26); c.stroke();
+  // hands gripping the wheel
+  c.fillStyle=SKIN; c.lineWidth=3.5; c.strokeStyle=OUTLINE;
+  circle(c,17,13.5,4.6); c.fill(); c.stroke();
+  circle(c,31,26.5,4.6); c.fill(); c.stroke();
+  // neck
+  c.fillStyle=SKIN; c.fillRect(-4.5,-4,9,9);
+  // big round head
+  circle(c,0,-15,19); c.fillStyle=SKIN; c.fill(); c.lineWidth=4.5; c.strokeStyle=OUTLINE; c.stroke();
+  // rosy cheeks
+  c.fillStyle='rgba(255,110,110,0.55)'; circle(c,-12.5,-7,4.4); c.fill(); circle(c,13.5,-7,4.4); c.fill();
+  // happy bold eyes with sparkle
+  c.fillStyle=OUTLINE; circle(c,-6.5,-14,3); c.fill(); circle(c,7.5,-14,3); c.fill();
+  c.fillStyle='#ffffff'; circle(c,-5.4,-15.2,1.2); c.fill(); circle(c,8.6,-15.2,1.2); c.fill();
+  // brows + tiny nose
+  c.strokeStyle=OUTLINE; c.lineWidth=2.6;
+  c.beginPath(); c.arc(-6.5,-17.5,4.4,Math.PI*1.15,Math.PI*1.85); c.stroke();
+  c.beginPath(); c.arc(7.5,-17.5,4.4,Math.PI*1.15,Math.PI*1.85); c.stroke();
+  c.beginPath(); c.arc(1,-10.5,2.2,0.3,Math.PI-0.9); c.stroke();
+  // big open smile + tongue
+  c.beginPath(); c.arc(1,-8.5,7.5,0.12*Math.PI,0.88*Math.PI); c.closePath();
+  c.fillStyle='#7a2e1d'; c.fill(); c.lineWidth=3; c.stroke();
+  c.beginPath(); c.arc(1,-5.4,3.4,0,Math.PI); c.closePath(); c.fillStyle='#ff8fa3'; c.fill();
+  // short black curly puffs around the hairline
+  c.fillStyle=HAIR;
+  [[-17,-24],[-11,-30],[-4,-33],[4,-33],[11,-30],[17,-24],[18.5,-16],[-18.5,-16]].forEach(pt=>{ circle(c,pt[0],pt[1],5.4); c.fill(); });
+  // blue cap worn BACKWARDS: dome on top, brim pointing back (left)
+  c.fillStyle='#2b5bd7'; c.beginPath(); c.arc(-1.5,-19,17.5,Math.PI*1.02,Math.PI*1.98); c.closePath(); c.fill();
+  c.lineWidth=4.5; c.strokeStyle=OUTLINE; c.stroke();
+  c.fillStyle='#2b5bd7'; rr(c,-33,-25,19,7.5,3.5); c.fill(); c.stroke();
+  circle(c,-1.5,-36.5,3.2); c.fillStyle='#e63b3b'; c.fill(); c.lineWidth=2.5; c.stroke();
   c.restore();
 }
 function drawKidForVehicle(c,vi,vx,vyGround,vw,t){
@@ -1072,13 +1103,19 @@ function drawCarExtras(c,vi,vx,vyGround,vw,t){
       c.restore();
     });
   }
-  // stickers spread across the body rect
+  // stickers spread across the body rect (v6: each sticker has a saved spot — drag them!)
+  const garageDrag=(state.screen==='paint'||state.screen==='stickers'||state.screen==='addons'||state.screen==='tires');
   st.stickers.forEach((sid,i)=>{
     const n=st.stickers.length;
     const fx=n===1?0:(i/(n-1)-0.5); // -0.5..0.5
-    const sx=vx+fx*vw*0.62;
-    const sy=top+h*(0.42+((i%2)?-0.13:0.13));
-    drawSticker(c,sid,sx,sy,sc*1.05);
+    let sx=vx+fx*vw*0.62;
+    let sy=top+h*(0.42+((i%2)?-0.13:0.13));
+    const sp=st.stickerPos&&st.stickerPos[sid];
+    if(sp){ sx=vx+sp.dx*vw; sy=vyGround+sp.dy*h; }
+    const lifted=DRAG&&DRAG.kind==='sticker'&&DRAG.id===sid;
+    if(lifted){ c.save(); c.globalAlpha=0.35; c.fillStyle='#ffffff'; circle(c,sx,sy,36*sc); c.fill(); c.restore(); }
+    drawSticker(c,sid,sx,sy,sc*1.05*(lifted?1.22:1));
+    if(garageDrag) btnCircle('dragstk'+sid,sx,sy,Math.max(36,32*sc),null,{onDown:(p)=>startDrag('sticker',sid,p,{vx,vy:vyGround,vw,h},sx,sy)});
   });
   // addons snap onto the visual rect (never floating)
   const LEGACY_ADDONS=['rocket','plow','spoiler','lightbar','roofrack','bow'];
@@ -1110,12 +1147,136 @@ function drawCarExtras(c,vi,vx,vyGround,vw,t){
       else if(anch==='rear'){ ax=vx-vw/2+16; ay=top+h*(0.34+i*0.16); }
       else if(anch==='front'){ ax=vx+vw/2-14; ay=top+h*(0.38+i*0.15); }
       else { ax=vx+off*vw*0.19; ay=top+h*0.56; }
-      drawAddon(c,id,ax,ay,s,t);
+      // v6: sticker-style add-ons (iconic/fun/birthday) keep a saved, draggable spot
+      const def2=ADDONS.find(a=>a.id===id);
+      const drag2=!!(def2&&(def2.cat==='iconic'||def2.cat==='fun'||def2.cat==='birthday'));
+      const ap=drag2&&st.addonPos&&st.addonPos[id];
+      if(ap){ ax=vx+ap.dx*vw; ay=vyGround+ap.dy*h; }
+      const lifted2=DRAG&&DRAG.kind==='addon'&&DRAG.id===id;
+      if(lifted2){ c.save(); c.globalAlpha=0.35; c.fillStyle='#ffffff'; circle(c,ax,ay,38*sc); c.fill(); c.restore(); }
+      drawAddon(c,id,ax,ay,s*(lifted2?1.22:1),t);
+      if(garageDrag&&drag2) btnCircle('dragadn'+id,ax,ay,Math.max(36,34*sc),null,{onDown:(p)=>startDrag('addon',id,p,{vx,vy:vyGround,vw,h},ax,ay)});
     });
   });
   // JJ rides in every seat — the car never drives empty
   drawKidForVehicle(c,vi,vx,vyGround,vw,t);
 }
+
+
+// ==================== v6: DRAGGABLE STICKERS + SPRAY PAINT ====================
+// Each sticker / decal-style add-on can store a custom spot per vehicle:
+// st.stickerPos[id] / st.addonPos[id] = {dx,dy}; the item renders at
+// (vx + dx*vw, vyGround + dy*h). No stored spot = the classic v5 anchor.
+let DRAG=null; // {kind:'sticker'|'addon', id, pid, fresh, gx, gy, frame:{vx,vy,vw,h}}
+function startDrag(kind,id,p,F,cx,cy){
+  DRAG={kind,id,pid:null,fresh:true,gx:p.x-cx,gy:p.y-cy,frame:F};
+  sfx.pop();
+}
+function moveDrag(p){
+  if(!DRAG) return;
+  const F=DRAG.frame, st=car();
+  const cx=clamp(p.x-DRAG.gx, F.vx-F.vw*0.58, F.vx+F.vw*0.58);
+  const cy=clamp(p.y-DRAG.gy, F.vy-F.h*1.18, F.vy+F.h*0.08);
+  const pos={dx:(cx-F.vx)/F.vw, dy:(cy-F.vy)/F.h};
+  if(DRAG.kind==='sticker'){ if(!st.stickerPos) st.stickerPos={}; st.stickerPos[DRAG.id]=pos; }
+  else { if(!st.addonPos) st.addonPos={}; st.addonPos[DRAG.id]=pos; }
+}
+// ---- spray paint state ----
+const PAINT={colorIdx:0,coverage:0,pc:null,tc:null};
+const SPRAY={on:false,pid:null,x:0,y:0};
+state.paintMode=false;
+function ensurePaintCanvas(){
+  if(!PAINT.pc){ PAINT.pc=document.createElement('canvas'); PAINT.pc.width=W; PAINT.pc.height=H; PAINT.tc=document.createElement('canvas'); }
+}
+function clearPaintLayer(){ ensurePaintCanvas(); PAINT.pc.getContext('2d').clearRect(0,0,W,H); }
+function hexA(hex,a){ const n=parseInt(hex.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+function enterPaintMode(){
+  if(state.paintMode){ sfx.spray(); return; }
+  state.paintMode=true; PAINT.colorIdx=car().color; PAINT.coverage=0; clearPaintLayer(); sfx.spray();
+}
+function exitPaintMode(){ state.paintMode=false; stopSpray(); PAINT.coverage=0; clearPaintLayer(); }
+function setCanColor(i){ PAINT.colorIdx=i; PAINT.coverage=0; clearPaintLayer(); sfx.spray(); }
+function stopSpray(){ if(SPRAY.on){ SPRAY.on=false; SPRAY.pid=null; } hissStop(); }
+// quiet spray hiss: looped filtered noise while the can is spraying
+let HISS=null;
+function hissStart(){
+  if(MUTED||HISS) return; const a=ac(); if(!a) return;
+  try{
+    const len=a.sampleRate, buf=a.createBuffer(1,len,a.sampleRate), ch=buf.getChannelData(0);
+    for(let i=0;i<len;i++) ch[i]=Math.random()*2-1;
+    const src=a.createBufferSource(); src.buffer=buf; src.loop=true;
+    const f=a.createBiquadFilter(); f.type='bandpass'; f.frequency.value=6500; f.Q.value=0.7;
+    const g=a.createGain(); g.gain.value=0; g.gain.setTargetAtTime(0.045,a.currentTime,0.05);
+    src.connect(f); f.connect(g); g.connect(a.destination); src.start();
+    HISS={src,g};
+  }catch(e){}
+}
+function hissStop(){
+  if(!HISS) return; const h=HISS; HISS=null;
+  try{ h.g.gain.setTargetAtTime(0,AC.currentTime,0.04); setTimeout(()=>{ try{ h.src.stop(); }catch(_){ } },180); }catch(_){ }
+}
+function sprayStamp(x,y){
+  ensurePaintCanvas();
+  const g=PAINT.pc.getContext('2d'), col=COLORS[PAINT.colorIdx].c;
+  for(let i=0;i<3;i++){
+    const px=x+rnd(-15,15), py=y+rnd(-15,15), r=rnd(17,30);
+    const gr=g.createRadialGradient(px,py,0,px,py,r);
+    gr.addColorStop(0,hexA(col,0.20)); gr.addColorStop(1,hexA(col,0));
+    g.fillStyle=gr; circle(g,px,py,r); g.fill();
+  }
+  g.fillStyle=hexA(col,0.5);
+  for(let i=0;i<7;i++){ circle(g,x+rnd(-30,30),y+rnd(-30,30),rnd(1.2,2.6)); g.fill(); }
+}
+function sprayFrame(dt,vx,vy,vw){
+  if(!SPRAY.on) return;
+  sprayStamp(SPRAY.x,SPRAY.y);
+  if(Math.random()<0.85) paintFx.push({x:SPRAY.x+rnd(-14,14),y:SPRAY.y+rnd(-10,10),vx:rnd(-30,30),vy:rnd(-46,-8),t:0,life:rnd(0.25,0.5),color:Math.random()<0.5?'#ffffff':COLORS[PAINT.colorIdx].c,r:rnd(2.5,5)});
+  const h=vehH(state.vi,vw), top=vy-h;
+  if(SPRAY.x>vx-vw/2&&SPRAY.x<vx+vw/2&&SPRAY.y>top&&SPRAY.y<vy){
+    PAINT.coverage=Math.min(1,PAINT.coverage+dt/2.5);
+    if(PAINT.coverage>=0.95) commitPaint(vx,vy);
+  }
+}
+function commitPaint(vx,vy){
+  const st=car(); st.color=PAINT.colorIdx; st.washed=0;
+  PAINT.coverage=0; clearPaintLayer();
+  sfx.star();
+  burstFx(vx,vy-170,'#ffffff',16); burstFx(vx,vy-170,COLORS[PAINT.colorIdx].c,12);
+}
+// paint layer: target color clipped to the vehicle silhouette (body only —
+// stickers/wheels/kid are drawn after it and stay clean), alpha grows with coverage
+function drawPaintOverlay(c,vi,vx,vyGround,vw){
+  if(!state.paintMode) return;
+  ensurePaintCanvas();
+  const sil=renderVehicle(vi,{}); if(!sil) return;
+  const NW=sil.width, NH=sil.height, h=vw*(NH/NW), tc=PAINT.tc, tg=tc.getContext('2d');
+  if(tc.width!==NW||tc.height!==NH){ tc.width=NW; tc.height=NH; }
+  tg.globalCompositeOperation='source-over'; tg.clearRect(0,0,NW,NH);
+  tg.drawImage(sil,0,0);
+  tg.globalCompositeOperation='source-in';
+  tg.drawImage(PAINT.pc, vx-vw/2, vyGround-h, vw, h, 0, 0, NW, NH);
+  c.save(); c.globalAlpha=clamp(0.35+PAINT.coverage*0.75,0,1);
+  c.drawImage(tc, vx-vw/2, vyGround-h, vw, h);
+  c.restore();
+}
+// v6 pointer handling: drags + spray (alongside the main input handlers)
+canvas.addEventListener('pointerdown', e=>{
+  const p=toLogical(e);
+  if(DRAG&&DRAG.fresh){ DRAG.pid=e.pointerId; DRAG.fresh=false; }
+  if(state.screen==='paint'&&state.paintMode&&!DRAG&&!hitButton(p)){
+    SPRAY.on=true; SPRAY.pid=e.pointerId; SPRAY.x=p.x; SPRAY.y=p.y; hissStart();
+  }
+});
+canvas.addEventListener('pointermove', e=>{
+  if(DRAG&&e.pointerId===DRAG.pid) moveDrag(toLogical(e));
+  if(SPRAY.on&&e.pointerId===SPRAY.pid){ const p=toLogical(e); SPRAY.x=p.x; SPRAY.y=p.y; }
+});
+function v6PointerEnd(e){
+  if(DRAG&&e.pointerId===DRAG.pid) DRAG=null;
+  if(SPRAY.on&&e.pointerId===SPRAY.pid) stopSpray();
+}
+canvas.addEventListener('pointerup', v6PointerEnd);
+canvas.addEventListener('pointercancel', v6PointerEnd);
 
 // ==================== SCREEN: PAINT SHOP ====================
 const paintFx=[]; // particles
@@ -1123,6 +1284,7 @@ function screenPaint(t,dt){
   paintBG();
   drawBackBtn();
   txt(ctx,'Paint Shop',W/2,52,36,'#ffffff','center','900',OUTLINE);
+  txt(ctx,state.paintMode?'Press + hold on the car to spray it!':'Drag stickers to place them!',W/2,90,19,'#ffffff','center','800',OUTLINE);
   const v=veh(), st=car();
   const vx=W/2+40, vy=400, vw=520;
   // lift
@@ -1133,6 +1295,7 @@ function screenPaint(t,dt){
   cRestore();
   // vehicle
   drawVehicleCached(ctx,state.vi,vx,vy,vw,{});
+  drawPaintOverlay(ctx,state.vi,vx,vy,vw);
   drawCarExtras(ctx,state.vi,vx,vy,vw,t);
   // wash overlay
   if(state.wash){
@@ -1164,8 +1327,8 @@ function screenPaint(t,dt){
   COLORS.forEach((col,i)=>{
     const sx=30+(i%2)*56, sy=112+Math.floor(i/2)*70;
     ctx.fillStyle=col.c; rr(ctx,sx,sy,48,48,12); ctx.fill();
-    ctx.lineWidth=st.color===i?7:4; ctx.strokeStyle=st.color===i?'#ffcf3f':OUTLINE; ctx.stroke();
-    btnRect('sw'+i,sx-4,sy-4,56,56,()=>{ st.color=i; st.washed=0; sfx.spray(); });
+    const selI=state.paintMode?PAINT.colorIdx:st.color; ctx.lineWidth=selI===i?7:4; ctx.strokeStyle=selI===i?'#ffcf3f':OUTLINE; ctx.stroke();
+    btnRect('sw'+i,sx-4,sy-4,56,56,()=>{ if(state.paintMode) setCanColor(i); else { st.color=i; st.washed=0; sfx.spray(); } });
   });
   cRestore();
   // bottom tool rail
@@ -1189,8 +1352,26 @@ function screenPaint(t,dt){
   cRestore();
   // particles
   updateDrawFx(dt);
-  // next arrow
-  drawNextBtn('›',()=>navTo('stickers'));
+  if(state.paintMode){
+    sprayFrame(dt,vx,vy,vw);
+    // coverage meter
+    cSave();
+    ctx.fillStyle='rgba(255,255,255,0.92)'; rr(ctx,W/2-130,108,260,30,15); ctx.fill();
+    ctx.lineWidth=4; ctx.strokeStyle=OUTLINE; ctx.stroke();
+    if(PAINT.coverage>0.01){ ctx.fillStyle=COLORS[PAINT.colorIdx].c; rr(ctx,W/2-126,112,252*clamp(PAINT.coverage/0.95,0,1),22,11); ctx.fill(); }
+    txt(ctx,'PAINT',W/2,124,17,OUTLINE,'center','900');
+    cRestore();
+    // DONE button (big, bottom right where the next arrow lives)
+    cSave();
+    ctx.fillStyle='#3fbf5a'; rr(ctx,W-200,H-104,180,68,34); ctx.fill();
+    ctx.lineWidth=6; ctx.strokeStyle=OUTLINE; ctx.stroke();
+    txt(ctx,'DONE ✓',W-110,H-68,30,'#ffffff','center','900',OUTLINE);
+    cRestore();
+    btnRect('paintdone',W-200,H-104,180,68,()=>{ exitPaintMode(); sfx.pop(); });
+  } else {
+    // next arrow
+    drawNextBtn('›',()=>navTo('stickers'));
+  }
 }
 function paintBG(){
   if(sceneryLoaded&&SCENERY.garage&&drawBGImage(SCENERY.garage)){ /* rich bg */ }
@@ -1240,7 +1421,7 @@ function useTool(id){
   if(id==='sponge'){
     if(state.wash) return;
     state.wash={t:0}; sfx.wash();
-  } else if(id==='spray'){ sfx.spray(); burstFx(W/2+40,300,'#9fd8f0',14); }
+  } else if(id==='spray'){ enterPaintMode(); }
   else if(id==='brush'){ sfx.pop(); burstFx(W/2+40,300,COLORS[st.color].c,10); }
   else { st.pattern = st.pattern===id ? 'none' : id; sfx.pop(); }
 }
@@ -1264,6 +1445,7 @@ function screenStickers(t,dt){
   drawBackBtn();
   txt(ctx,'Sticker Studio',W/2,52,36,'#ffffff','center','900',OUTLINE);
   txt(ctx,'Pick a set, then tap a sticker — tap again to take it off',W/2,92,20,'#ffffff','center','800');
+  txt(ctx,'Drag stickers to place them!',W/2,118,17,'#ffdf3f','center','800',OUTLINE);
   const st=car(), vx=W/2, vy=360, vw=500;
   ctx.fillStyle='#ffcf3f'; rr(ctx,vx-vw/2-20,vy+6,vw+40,26,10); ctx.fill();
   ctx.lineWidth=5; ctx.strokeStyle=OUTLINE; ctx.stroke();
@@ -1352,6 +1534,7 @@ function screenAddons(t,dt){
   drawBackBtn();
   txt(ctx,'Big Extras',W/2,52,36,'#ffffff','center','900',OUTLINE);
   txt(ctx,'Over 100 extras — pick some, they snap right onto your ride!',W/2,92,20,'#ffffff','center','800');
+  txt(ctx,'Drag stickers to place them!',W/2,118,17,'#ffdf3f','center','800',OUTLINE);
   const st=car(), vx=W/2, vy=380, vw=500;
   drawVehicleCached(ctx,state.vi,vx,vy,vw,{});
   drawCarExtras(ctx,state.vi,vx,vy,vw,t);
@@ -1486,7 +1669,7 @@ function driveTouch(p,down){
   const left = p.x < W/2;
   if(down){ left?touchL++:touchR++; } else { left?touchL=Math.max(0,touchL-1):touchR=Math.max(0,touchR-1); }
 }
-const WORLD_LEN=6200, ROAD_Y=H-150;
+const WORLD_LEN=12000, ROAD_Y=H-150; // v6: courses doubled in length (all placements are fraction-based)
 // ---------- rolling terrain (height-field, never flat) ----------
 function courseSeed(id){ return id==='gotham'?1.3:id==='metropolis'?2.6:id==='jurassic'?4.1:5.7; }
 function terrainH(x,id){
@@ -1548,14 +1731,16 @@ function doBoost(){
 function startDrive(){
   const cs=COURSES[state.course]||COURSES[0];
   const stars=[];
-  for(let i=0;i<26;i++){
+  const NSTAR=Math.max(10,Math.floor((WORLD_LEN-700)/215));
+  for(let i=0;i<NSTAR;i++){
     const sx=500+i*215+rnd(-40,40);
     stars.push({x:sx, y:roadY(sx,cs.id)-150-rnd(0,40), got:false, ph:rnd(0,6)});
   }
   // per-course obstacles: pure decoration sitting ON the terrain, sparse so a 3-year-old never gets blocked
   const oset=OBSTACLE_SETS[cs.id]||[];
   const obstacles=[];
-  for(let i=0;i<12 && oset.length;i++){
+  const NOB=Math.max(6,Math.floor((WORLD_LEN-900)/440));
+  for(let i=0;i<NOB && oset.length;i++){
     const onRoad=(i%3)!==2;
     const ox=750+i*440+rnd(-70,70);
     obstacles.push({
@@ -2022,7 +2207,7 @@ function screenDrive(t,dt){
   ctx.fillStyle='rgba(255,255,255,0.92)'; rr(ctx,16,14,150,52,26); ctx.fill();
   ctx.lineWidth=4; ctx.strokeStyle=OUTLINE; ctx.stroke();
   star(ctx,48,40,17,0.2); ctx.fillStyle='#ffcf3f'; ctx.fill(); ctx.stroke();
-  txt(ctx,d.collected+' / 26',112,41,26,OUTLINE,'center','900');
+  txt(ctx,d.collected+' / '+d.stars.length,112,41,26,OUTLINE,'center','900');
   ctx.fillStyle='rgba(255,255,255,0.92)'; rr(ctx,W/2-130,14,260,52,26); ctx.fill();
   ctx.lineWidth=4; ctx.strokeStyle=OUTLINE; ctx.stroke();
   txt(ctx,cs.name,W/2,41,24,OUTLINE,'center','900');
@@ -2093,7 +2278,7 @@ function drawFinishPanel(){
   ctx.lineWidth=8; ctx.strokeStyle=OUTLINE; ctx.stroke();
   txt(ctx,'FINISH!',W/2,py+64,52,'#e63b3b','center','900',OUTLINE);
   star(ctx,W/2-140,py+140,34,0.2); ctx.fillStyle='#ffcf3f'; ctx.fill(); ctx.lineWidth=5; ctx.strokeStyle=OUTLINE; ctx.stroke();
-  txt(ctx,d.collected+' / 26',W/2,py+142,40,OUTLINE,'center','900');
+  txt(ctx,d.collected+' / '+d.stars.length,W/2,py+142,40,OUTLINE,'center','900');
   txt(ctx,d.collected>=20?'Amazing driving!':(d.collected>=10?'Great job!':'Nice ride!'),W/2,py+200,28,OUTLINE,'center','800');
   // buttons
   const by=py+280;
@@ -2125,6 +2310,8 @@ function frame(ts){
   if(state.selectPop>0) state.selectPop-=dt*2;
   if(state.toastT>0) state.toastT-=dt;
   if(state.wash){ state.wash.t+=dt; if(state.wash.t>2.5){ state.wash=null; car().washed=1; sfx.pop(); } }
+  if(state.screen!=='paint'&&state.paintMode) exitPaintMode();
+  if(!(state.screen==='paint'||state.screen==='stickers'||state.screen==='addons'||state.screen==='tires')) DRAG=null;
   // draw
   ctx.setTransform(DPR*SCALE,0,0,DPR*SCALE,0,0);
   const fn = SCREENS[state.screen];
