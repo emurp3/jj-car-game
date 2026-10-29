@@ -833,31 +833,87 @@ function drawMuteBtn(x,y){
   cRestore();
   btnCircle('mute',x,y,30,()=>{ MUTED=!MUTED; });
 }
-function drawMechanic(x,y,s){
-  // friendly mechanic (not a raccoon): round face, cap, overalls, waving
+function drawJJStanding(x,y,s){
+  // JJ himself, standing in the garage and waving — the ONLY child
+  // character in this game. Head, locs, face, skin and jacket are the
+  // driver's exact design (drawKidDriver): long black dreadlocks framing
+  // his face, deep brown skin #74451f, big toothy grin, red racing jacket.
+  const SKIN='#74451f', HAIR='#17130f', HAIR_HI='#3a2a18';
   cSave(); ctx.translate(x,y); ctx.scale(s,s);
+  ctx.lineCap='round'; ctx.lineJoin='round';
   const wave = Math.sin(performance.now()/400)*0.15;
-  // body overalls
-  ctx.fillStyle='#3fa7ff'; rr(ctx,-28,-70,56,70,14); ctx.fill();
-  ctx.lineWidth=5; ctx.strokeStyle=OUTLINE; ctx.stroke();
-  ctx.fillStyle='#ffcf3f'; ctx.fillRect(-28,-40,56,10);
-  // arm waving
-  ctx.save(); ctx.translate(28,-56); ctx.rotate(-0.5+wave);
-  ctx.fillStyle='#3fa7ff'; rr(ctx,-9,-46,18,46,9); ctx.fill(); ctx.stroke();
-  circle(ctx,0,-50,11); ctx.fillStyle='#f2b880'; ctx.fill(); ctx.stroke(); ctx.restore();
-  // other arm
-  ctx.fillStyle='#3fa7ff'; rr(ctx,-46,-60,18,44,9); ctx.fill(); ctx.stroke();
-  // head
-  circle(ctx,0,-92,30); ctx.fillStyle='#f2b880'; ctx.fill(); ctx.stroke();
-  // cap
-  ctx.fillStyle='#e63b3b'; ctx.beginPath(); ctx.arc(0,-96,30,Math.PI,TAU); ctx.fill(); ctx.stroke();
-  ctx.fillRect(8,-104,34,10);
-  // face
-  ctx.fillStyle=OUTLINE; circle(ctx,-10,-88,4); ctx.fill(); circle(ctx,10,-88,4); ctx.fill();
-  ctx.lineWidth=3; ctx.beginPath(); ctx.arc(0,-80,10,0.4,Math.PI-0.4); ctx.stroke();
-  // legs
-  ctx.fillStyle='#2b2b33'; rr(ctx,-24,0,20,26,8); ctx.fill(); ctx.stroke();
-  ctx.fillStyle='#2b2b33'; rr(ctx,4,0,20,26,8); ctx.fill(); ctx.stroke();
+  // legs (dark pants) + white sneakers, like his photo
+  ctx.fillStyle='#2b3550';
+  rr(ctx,-17,-26,13,52,6); ctx.fill();
+  rr(ctx,4,-26,13,52,6); ctx.fill();
+  ctx.fillStyle='#f2f2f5'; ctx.lineWidth=3.5; ctx.strokeStyle=OUTLINE;
+  rr(ctx,-20,23,19,9,4); ctx.fill(); ctx.stroke();
+  rr(ctx,2,23,19,9,4); ctx.fill(); ctx.stroke();
+  // waving arm (his right): red sleeve + skin hand, animated wave
+  ctx.save(); ctx.translate(20,-64); ctx.rotate(-0.55+wave);
+  ctx.strokeStyle='#e63b3b'; ctx.lineWidth=9;
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(4,-26); ctx.stroke();
+  ctx.fillStyle=SKIN; ctx.lineWidth=3.5; ctx.strokeStyle=OUTLINE;
+  circle(ctx,5,-32,5.5); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  // resting arm (his left)
+  ctx.strokeStyle='#e63b3b'; ctx.lineWidth=9;
+  ctx.beginPath(); ctx.moveTo(-20,-62); ctx.lineTo(-27,-33); ctx.stroke();
+  ctx.fillStyle=SKIN; ctx.lineWidth=3.5; ctx.strokeStyle=OUTLINE;
+  circle(ctx,-27,-30,5.5); ctx.fill(); ctx.stroke();
+  // red racing jacket torso with white stripes (the driver's jacket)
+  ctx.fillStyle='#e63b3b'; rr(ctx,-22,-72,44,48,12); ctx.fill();
+  ctx.lineWidth=4.5; ctx.strokeStyle=OUTLINE; ctx.stroke();
+  ctx.fillStyle='#ffffff'; ctx.fillRect(-14,-66,5,36); ctx.fillRect(9,-66,5,36);
+  ctx.fillStyle='#b3232a'; rr(ctx,-9,-74,18,8,4); ctx.fill(); ctx.stroke();
+  // ---- head: the driver's head, verbatim, shifted so its center (0,-15)
+  // lands at (0,-94) — same locs, same face, same grin ----
+  ctx.save(); ctx.translate(0,-79);
+  ctx.lineWidth=4.5; ctx.strokeStyle=OUTLINE;
+  // neck
+  ctx.fillStyle=SKIN; ctx.fillRect(-4.5,-4,9,9);
+  // BACK LOCS (same strands as the driver)
+  ctx.strokeStyle=HAIR; ctx.lineCap='round';
+  [[-21,-23,-22,5],[-17.5,-27,-19,9],[-14,-29.5,-15.5,3],[21,-23,22,5],[17.5,-27,19,9],[14,-29.5,15.5,3]].forEach(L=>{
+    ctx.lineWidth=6.2; ctx.beginPath(); ctx.moveTo(L[0],L[1]); ctx.quadraticCurveTo(L[0]*1.05,(L[1]+L[3])/2,L[2],L[3]); ctx.stroke();
+  });
+  // big round head
+  circle(ctx,0,-15,19); ctx.fillStyle=SKIN; ctx.fill(); ctx.lineWidth=4.5; ctx.strokeStyle=OUTLINE; ctx.stroke();
+  // ears
+  ctx.fillStyle=SKIN; ctx.lineWidth=3.5; ctx.strokeStyle=OUTLINE;
+  circle(ctx,-18.6,-12,3.8); ctx.fill(); ctx.stroke();
+  circle(ctx,18.6,-12,3.8); ctx.fill(); ctx.stroke();
+  // cheeks
+  ctx.fillStyle='rgba(224,122,95,0.38)'; circle(ctx,-12.5,-7,4.4); ctx.fill(); circle(ctx,13.5,-7,4.4); ctx.fill();
+  // eyes with sparkle
+  ctx.fillStyle=OUTLINE; circle(ctx,-6.5,-14,3); ctx.fill(); circle(ctx,7.5,-14,3); ctx.fill();
+  ctx.fillStyle='#ffffff'; circle(ctx,-5.4,-15.2,1.2); ctx.fill(); circle(ctx,8.6,-15.2,1.2); ctx.fill();
+  // brows + tiny nose
+  ctx.strokeStyle=OUTLINE; ctx.lineWidth=2.6;
+  ctx.beginPath(); ctx.arc(-6.5,-17.5,4.4,Math.PI*1.15,Math.PI*1.85); ctx.stroke();
+  ctx.beginPath(); ctx.arc(7.5,-17.5,4.4,Math.PI*1.15,Math.PI*1.85); ctx.stroke();
+  ctx.beginPath(); ctx.arc(1,-10.5,2.2,0.3,Math.PI-0.9); ctx.stroke();
+  // BIG TOOTHY GRIN + tiny tongue (same as the driver)
+  ctx.beginPath(); ctx.arc(1,-9.5,8.8,0.08*Math.PI,0.92*Math.PI); ctx.closePath();
+  ctx.fillStyle='#ffffff'; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle=OUTLINE; ctx.stroke();
+  ctx.lineWidth=1.5; ctx.beginPath();
+  ctx.moveTo(-2.6,-7.2); ctx.lineTo(-2.6,-4.6); ctx.moveTo(4.6,-7.2); ctx.lineTo(4.6,-4.6); ctx.stroke();
+  ctx.beginPath(); ctx.arc(1,-3.8,2.8,0,Math.PI); ctx.closePath(); ctx.fillStyle='#e2707e'; ctx.fill();
+  // FRONT LOCS framing the face
+  ctx.strokeStyle=HAIR; ctx.lineCap='round';
+  [[-16.5,-27,-17.5,2],[16.5,-27,17.5,2]].forEach(L=>{
+    ctx.lineWidth=5.6; ctx.beginPath(); ctx.moveTo(L[0],L[1]); ctx.quadraticCurveTo(L[0]*1.06,-12,L[2],L[3]); ctx.stroke();
+  });
+  // locs across the top hairline
+  [[-13,-30.5,-13.5,-23],[-7,-32.5,-7,-24.5],[0,-33.5,0,-25],[7,-32.5,7,-24.5],[13,-30.5,13.5,-23]].forEach(L=>{
+    ctx.lineWidth=5.6; ctx.beginPath(); ctx.moveTo(L[0],L[1]); ctx.quadraticCurveTo(L[0],(L[1]+L[3])/2,L[2],L[3]); ctx.stroke();
+  });
+  // sheen
+  ctx.strokeStyle=HAIR_HI; ctx.lineWidth=1.8;
+  [[-17.5,-26,-18.8,7],[17.5,-26,18.8,7],[0,-33,0.3,-26],[-13,-30,-13.4,-24]].forEach(L=>{
+    ctx.beginPath(); ctx.moveTo(L[0],L[1]); ctx.quadraticCurveTo(L[0]*1.05,(L[1]+L[3])/2,L[2],L[3]); ctx.stroke();
+  });
+  ctx.restore();
   cRestore();
 }
 
@@ -1579,7 +1635,7 @@ function drawWheelSpin(c,x,y,r,style,rot){
   const fb = style==='t_star'?'star' : style==='t_rainbow'?'rainbow' : 'classic';
   drawWheel(c,x,y,r,fb,rot||0);
 }
-function drawKidInCar(c,vi,vx,vyGround,vw,t){
+function drawKidInCar(c,vi,vx,vyGround,vw,t,noKid){
   const h=vehH(vi,vw), top=vyGround-h, seat=SEATS[vi]||[0.52,0.32], win=WINDOWS[vi];
   const cx=vx+(win[0]-0.5)*vw, cy=top+win[1]*h, rx=win[2]*vw/2, ry=win[3]*h/2;
   c.save();
@@ -1592,7 +1648,7 @@ function drawKidInCar(c,vi,vx,vyGround,vw,t){
   rr(c, cx-rx*0.55, cy-ry*0.62, rx*0.82, ry*1.25, 12); c.fill();
   // JJ himself — v7 art, unchanged
   const shrink=(vi===3||vi===8)?0.82:1;
-  drawKidDriver(c, vx+(seat[0]-0.5)*vw, top+seat[1]*h, (vw/300)*shrink, t);
+  if(!noKid) drawKidDriver(c, vx+(seat[0]-0.5)*vw, top+seat[1]*h, (vw/300)*shrink, t);
   c.restore();
 }
 function drawStickersOn(c,vi,vx,vyGround,vw,opts){
@@ -1674,7 +1730,7 @@ function drawVehicleAssembled(c,vi,vx,vyGround,vw,opts){
     c.restore();
   }
   // 2) cabin interior + JJ inside (clipped to the open window)
-  drawKidInCar(c,vi,vx,vyGround,vw,t);
+  drawKidInCar(c,vi,vx,vyGround,vw,t,opts.noKid);
   // 3) body with the window + wheel holes cut out — the door covers JJ's legs
   const body=bodyCanvas(vi);
   if(body) c.drawImage(body, vx-vw/2, top, vw, h);
@@ -1782,8 +1838,8 @@ function screenSelect(t,dt){
   // neighbours peeking in from the edges (Amaya-style bay)
   const pv=(state.vi-1+VEHICLES.length)%VEHICLES.length, nv=(state.vi+1)%VEHICLES.length;
   cSave(); ctx.globalAlpha=0.85;
-  drawVehicleAssembled(ctx,pv,-96,472,380,{t:t});
-  drawVehicleAssembled(ctx,nv,W+96,472,380,{t:t});
+  drawVehicleAssembled(ctx,pv,-96,472,380,{t:t,noKid:true});
+  drawVehicleAssembled(ctx,nv,W+96,472,380,{t:t,noKid:true});
   cRestore();
   // the car of the moment, JJ already inside
   const pop=state.selectPop>0?1+Math.sin(state.selectPop*14)*0.05*state.selectPop:1;
@@ -1802,7 +1858,7 @@ function screenSelect(t,dt){
     ctx.fillStyle=i===state.vi?'#ffcf3f':'rgba(255,255,255,0.7)'; ctx.fill();
     ctx.lineWidth=2; ctx.strokeStyle=OUTLINE; ctx.stroke();
   }
-  drawMechanic(W-110,560,1.15);
+  drawJJStanding(W-110,560,1.15);
 }
 function arrowBtn(x,y,dir){
   cSave();
